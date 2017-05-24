@@ -36,7 +36,7 @@ func (command *TriggerJobCommand) Execute(args []string) error {
 		return err
 	}
 
-	if &buildNumber != nil {
+	if buildNumber != 0 {
 		build, err = target.Team().Rebuild(pipelineName, jobName, buildNumber)
 		if err != nil {
 			return err
