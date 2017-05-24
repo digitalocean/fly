@@ -10,7 +10,6 @@ import (
 type JobFlag struct {
 	PipelineName string
 	JobName      string
-	BuildNumber  *uint64
 }
 
 func (job *JobFlag) UnmarshalFlag(value string) error {

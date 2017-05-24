@@ -15,7 +15,7 @@ import (
 
 type TriggerJobCommand struct {
 	Job         flaghelpers.JobFlag `short:"j" long:"job" required:"true" value-name:"PIPELINE/JOB" description:"Name of a job to trigger"`
-	BuildNumber flaghelpers.JobFlag `short:"b" long:"build" required:"false" description:"Build number for job rebuild"`
+	BuildNumber uint64              `short:"b" long:"build" required:"false" description:"Build number for job rebuild"`
 	Watch       bool                `short:"w" long:"watch" description:"Start watching the build output"`
 }
 
@@ -24,7 +24,7 @@ func (command *TriggerJobCommand) Execute(args []string) error {
 
 	pipelineName := command.Job.PipelineName
 	jobName := command.Job.JobName
-	buildNumber := command.Job.BuildNumber
+	buildNumber := command.BuildNumber
 
 	target, err := rc.LoadTarget(Fly.Target)
 	if err != nil {
@@ -36,12 +36,12 @@ func (command *TriggerJobCommand) Execute(args []string) error {
 		return err
 	}
 
-	if buildNumber != nil {
-		build, err = target.Team().Rebuild(pipelineName, jobName, *buildNumber)
+	if &buildNumber != nil {
+		build, err = target.Team().Rebuild(pipelineName, jobName, buildNumber)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("started %s%s #%s %s", pipelineName, jobName, build.Name, *buildNumber)
+		fmt.Printf("started %s%s #%s %s", pipelineName, jobName, build.Name, buildNumber)
 	} else {
 		build, err = target.Team().CreateJobBuild(pipelineName, jobName)
 		if err != nil {
