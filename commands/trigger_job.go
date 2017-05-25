@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 
 	"github.com/concourse/atc"
@@ -37,11 +38,20 @@ func (command *TriggerJobCommand) Execute(args []string) error {
 	}
 
 	if buildNumber != nil {
-		build, err = target.Team().CreateRebuild(pipelineName, jobName, *buildNumber)
+		var ok bool
+		build, ok, err = target.Team().JobBuild(pipelineName, jobName, strconv.Itoa(int(*buildNumber)))
+		if !ok {
+			if err != nil {
+				return err
+			}
+			return fmt.Errorf("no such build for job %s/%s: %d", pipelineName, jobName, *buildNumber)
+		}
+
+		build, err = target.Team().CreateRebuild(strconv.Itoa(build.ID))
 		if err != nil {
 			return err
 		}
-		fmt.Printf("started %s%s #%s %s", pipelineName, jobName, build.Name, *buildNumber)
+		fmt.Printf("started %s%s #%s %d", pipelineName, jobName, build.Name, *buildNumber)
 	} else {
 		build, err = target.Team().CreateJobBuild(pipelineName, jobName)
 		if err != nil {
